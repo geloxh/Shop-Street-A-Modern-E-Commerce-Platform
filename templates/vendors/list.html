@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vendors - Shop Street{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Our Vendors</h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">Discover our trusted partners who bring you quality products</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for vendor in vendors %}
+        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-store text-primary-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ vendor.business_name }}</h3>
+                {% if vendor.description %}
+                    <p class="text-gray-600 mb-4">{{ vendor.description|truncatewords:20 }}</p>
+                {% endif %}
+                {% if vendor.phone %}
+                    <p class="text-sm text-gray-500 mb-2">
+                        <i class="fas fa-phone mr-2"></i>{{ vendor.phone }}
+                    </p>
+                {% endif %}
+                {% if vendor.address %}
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-map-marker-alt mr-2"></i>{{ vendor.address|truncatewords:10 }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-store text-gray-400 text-6xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No vendors found</h3>
+            <p class="text-gray-500">Check back later for our vendor listings.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

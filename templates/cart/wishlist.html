@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Wishlist - Shop Street{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">My Wishlist</h1>
+    
+    {% if wishlist.items.exists %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for item in wishlist.items.all %}
+        <div class="product-card group">
+            <div class="relative overflow-hidden">
+                <a href="{{ item.product.get_absolute_url }}">
+                    {% if item.product.main_image %}
+                        <img src="{{ item.product.main_image.image.url }}" alt="{{ item.product.name }}" 
+                             class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% else %}
+                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                    {% endif %}
+                </a>
+                
+                {% if item.product.is_on_sale %}
+                    <div class="absolute top-2 left-2">
+                        <span class="badge bg-red-500 text-white">-{{ item.product.discount_percentage }}%</span>
+                    </div>
+                {% endif %}
+                
+                <div class="absolute top-2 right-2">
+                    <form method="post" action="{% url 'cart:remove_from_wishlist' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-white p-2 rounded-full shadow-md hover:bg-red-50 text-red-500">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <h3 class="font-semibold text-gray-800 mb-2">
+                    <a href="{{ item.product.get_absolute_url }}" class="hover:text-primary-600">
+                        {{ item.product.name }}
+                    </a>
+                </h3>
+                
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                    {{ item.product.short_description|default:item.product.description|truncatewords:10 }}
+                </p>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg font-bold text-primary-600">${{ item.product.price }}</span>
+                        {% if item.product.compare_price %}
+                            <span class="text-sm text-gray-500 line-through">${{ item.product.compare_price }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if item.product.is_in_stock %}
+                        <span class="badge badge-success">In Stock</span>
+                    {% else %}
+                        <span class="badge badge-danger">Out of Stock</span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex space-x-2">
+                    <a href="{{ item.product.get_absolute_url }}" class="flex-1 btn btn-outline text-center text-sm">
+                        View Details
+                    </a>
+                    {% if item.product.is_in_stock %}
+                        <button class="btn btn-primary add-to-cart text-sm" data-product-id="{{ item.product.id }}">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-2 text-xs text-gray-500">
+                    Added {{ item.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Wishlist Actions -->
+    <div class="mt-8 text-center">
+        <a href="{% url 'products:list' %}" class="btn btn-outline mr-4">
+            <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+        </a>
+    </div>
+    
+    {% else %}
+    <!-- Empty Wishlist -->
+    <div class="text-center py-16">
+        <div class="max-w-md mx-auto">
+            <i class="fas fa-heart text-gray-400 text-6xl mb-6"></i>
+            <h2 class="text-2xl font-semibold text-gray-600 mb-4">Your wishlist is empty</h2>
+            <p class="text-gray-500 mb-8">Save items you love to your wishlist and never lose track of them.</p>
+            <a href="{% url 'products:list' %}" class="btn btn-primary px-8 py-3">
+                Start Shopping <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            Cart.add(productId).then(() => {
+                // Optionally remove from wishlist after adding to cart
+                showNotification('Added to cart! Item remains in wishlist.', 'success');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

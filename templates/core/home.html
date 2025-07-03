@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shop Street - Modern E-commerce Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-primary text-white py-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-5xl font-bold mb-6 text-shadow">Welcome to Shop Street</h1>
+            <p class="text-xl mb-8 opacity-90">Discover amazing products at unbeatable prices. Your shopping journey starts here.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'products:list' %}" class="btn btn-primary bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 text-lg">
+                    Shop Now <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="{% url 'core:about' %}" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg">
+                    Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shipping-fast text-primary-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Free Shipping</h3>
+                <p class="text-gray-600">Free shipping on orders over $50. Fast and reliable delivery.</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-primary-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Secure Payment</h3>
+                <p class="text-gray-600">Your payment information is safe and secure with us.</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-undo text-primary-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Easy Returns</h3>
+                <p class="text-gray-600">30-day return policy. No questions asked.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Featured Products</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Discover our handpicked selection of premium products</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in featured_products %}
+            <div class="product-card group">
+                <div class="relative overflow-hidden">
+                    {% if product.main_image %}
+                        <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" 
+                             class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% else %}
+                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    {% if product.is_on_sale %}
+                        <div class="absolute top-2 left-2">
+                            <span class="badge bg-red-500 text-white">-{{ product.discount_percentage }}%</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {% if user.is_authenticated %}
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-gray-50 add-to-wishlist" data-product-id="{{ product.id }}">
+                                <i class="fas fa-heart text-gray-400 hover:text-red-500"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-800 mb-2 truncate">{{ product.name }}</h3>
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ product.short_description|default:product.description|truncatewords:10 }}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg font-bold text-primary-600">${{ product.price }}</span>
+                            {% if product.compare_price %}
+                                <span class="text-sm text-gray-500 line-through">${{ product.compare_price }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if product.is_in_stock %}
+                            <span class="badge badge-success">In Stock</span>
+                        {% else %}
+                            <span class="badge badge-danger">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-4 flex space-x-2">
+                        <a href="{{ product.get_absolute_url }}" class="flex-1 btn btn-outline text-center">
+                            View Details
+                        </a>
+                        {% if product.is_in_stock %}
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="{% url 'products:list' %}" class="btn btn-primary px-8 py-3">
+                View All Products <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories -->
+{% if categories %}
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Shop by Category</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Explore our wide range of product categories</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {% for category in categories %}
+            <a href="{{ category.get_absolute_url }}" class="group text-center">
+                <div class="bg-gray-100 rounded-lg p-6 mb-3 group-hover:bg-primary-100 transition-colors duration-300">
+                    {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-12 h-12 mx-auto">
+                    {% else %}
+                        <i class="fas fa-tag text-3xl text-gray-400 group-hover:text-primary-600"></i>
+                    {% endif %}
+                </div>
+                <h3 class="font-medium text-gray-800 group-hover:text-primary-600">{{ category.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Latest Products -->
+{% if latest_products %}
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Latest Arrivals</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Check out our newest products</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in latest_products %}
+            <div class="product-card group">
+                <div class="relative overflow-hidden">
+                    {% if product.main_image %}
+                        <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" 
+                             class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% else %}
+                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="absolute top-2 left-2">
+                        <span class="badge bg-green-500 text-white">New</span>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-800 mb-2 truncate">{{ product.name }}</h3>
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-bold text-primary-600">${{ product.price }}</span>
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-outline btn-sm">
+                            View
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Newsletter -->
+<section class="py-16 bg-primary-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
+        <p class="text-xl mb-8 opacity-90">Subscribe to our newsletter for exclusive deals and updates</p>
+        
+        <form class="max-w-md mx-auto flex">
+            <input type="email" placeholder="Enter your email" 
+                   class="flex-1 px-4 py-3 rounded-l-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white">
+            <button type="submit" class="bg-white text-primary-600 px-6 py-3 rounded-r-lg font-semibold hover:bg-gray-100">
+                Subscribe
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add to cart functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
+    
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            addToCart(productId);
+        });
+    });
+    
+    addToWishlistButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            addToWishlist(productId);
+        });
+    });
+});
+
+function addToCart(productId) {
+    fetch('{% url "cart:add" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `product_id=${productId}&quantity=1`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Product added to cart!', 'success');
+            updateCartCount(data.cart_items_count);
+        }
+    })
+    .catch(error => {
+        showNotification('Error adding product to cart', 'error');
+    });
+}
+
+function addToWishlist(productId) {
+    fetch('{% url "cart:add_to_wishlist" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `product_id=${productId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+        }
+    })
+    .catch(error => {
+        showNotification('Error adding to wishlist', 'error');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function updateCartCount(count) {
+    const cartCountElement = document.querySelector('.fa-shopping-cart').nextElementSibling;
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - Shop Street{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Filters -->
+        <div class="lg:w-1/4">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                
+                <form method="get" class="space-y-6">
+                    <!-- Categories -->
+                    <div>
+                        <h4 class="font-medium mb-3">Categories</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="category" value="" class="mr-2" {% if not request.GET.category %}checked{% endif %}>
+                                <span>All Categories</span>
+                            </label>
+                            {% for category in categories %}
+                            <label class="flex items-center">
+                                <input type="radio" name="category" value="{{ category.slug }}" class="mr-2" 
+                                       {% if request.GET.category == category.slug %}checked{% endif %}>
+                                <span>{{ category.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Price Range -->
+                    <div>
+                        <h4 class="font-medium mb-3">Price Range</h4>
+                        <div class="flex space-x-2">
+                            <input type="number" placeholder="Min" class="input-field flex-1" 
+                                   name="min_price" value="{{ request.GET.min_price }}">
+                            <input type="number" placeholder="Max" class="input-field flex-1" 
+                                   name="max_price" value="{{ request.GET.max_price }}">
+                        </div>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div>
+                        <h4 class="font-medium mb-3">Sort By</h4>
+                        <select name="sort" class="input-field w-full">
+                            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest</option>
+                            <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="-price" {% if request.GET.sort == '-price' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Name: A to Z</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-full">Apply Filters</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="lg:w-3/4">
+            <!-- Results Info -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">Products</h2>
+                <p class="text-gray-600">{{ object_list|length }} products found</p>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for product in object_list %}
+                <div class="product-card group">
+                    <div class="relative overflow-hidden">
+                        <a href="{{ product.get_absolute_url }}">
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image.image.url }}" alt="{{ product.name }}" 
+                                     class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                            {% else %}
+                                <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400 text-4xl"></i>
+                                </div>
+                            {% endif %}
+                        </a>
+                        
+                        {% if product.is_on_sale %}
+                            <div class="absolute top-2 left-2">
+                                <span class="badge bg-red-500 text-white">-{{ product.discount_percentage }}%</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {% if user.is_authenticated %}
+                                <button class="bg-white p-2 rounded-full shadow-md hover:bg-gray-50 add-to-wishlist" 
+                                        data-product-id="{{ product.id }}">
+                                    <i class="fas fa-heart text-gray-400 hover:text-red-500"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-800 mb-2">
+                            <a href="{{ product.get_absolute_url }}" class="hover:text-primary-600">
+                                {{ product.name }}
+                            </a>
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {{ product.short_description|default:product.description|truncatewords:10 }}
+                        </p>
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg font-bold text-primary-600">${{ product.price }}</span>
+                                {% if product.compare_price %}
+                                    <span class="text-sm text-gray-500 line-through">${{ product.compare_price }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if product.is_in_stock %}
+                                <span class="badge badge-success">In Stock</span>
+                            {% else %}
+                                <span class="badge badge-danger">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <a href="{{ product.get_absolute_url }}" class="flex-1 btn btn-outline text-center">
+                                View Details
+                            </a>
+                            {% if product.is_in_stock %}
+                                <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-search text-gray-400 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
+                    <p class="text-gray-500">Try adjusting your filters or search terms.</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="flex justify-center mt-8">
+                <nav class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 bg-primary-600 text-white rounded-lg">
+                        {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Last</a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add to cart and wishlist functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            // Add your cart functionality here
+            console.log('Add to cart:', productId);
+        });
+    });
+    
+    document.querySelectorAll('.add-to-wishlist').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            // Add your wishlist functionality here
+            console.log('Add to wishlist:', productId);
+        });
+    });
+});
+</script>
+{% endblock %}

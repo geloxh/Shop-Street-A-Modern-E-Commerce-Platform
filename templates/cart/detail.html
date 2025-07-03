@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - Shop Street{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+    
+    {% if cart and cart.items.exists %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                {% for item in cart.items.all %}
+                <div class="flex items-center p-6 border-b border-gray-200 last:border-b-0">
+                    <!-- Product Image -->
+                    <div class="w-20 h-20 flex-shrink-0 mr-4">
+                        {% if item.product.main_image %}
+                            <img src="{{ item.product.main_image.image.url }}" alt="{{ item.product.name }}" 
+                                 class="w-full h-full object-cover rounded-lg">
+                        {% else %}
+                            <div class="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800">
+                            <a href="{{ item.product.get_absolute_url }}" class="hover:text-primary-600">
+                                {{ item.product.name }}
+                            </a>
+                        </h3>
+                        {% if item.variant %}
+                            <p class="text-sm text-gray-600">{{ item.variant.name }}: {{ item.variant.value }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-600">SKU: {{ item.product.sku }}</p>
+                    </div>
+                    
+                    <!-- Quantity Controls -->
+                    <div class="flex items-center space-x-3 mx-4">
+                        <div class="quantity-selector flex items-center border border-gray-300 rounded-lg">
+                            <button class="decrease px-3 py-1 hover:bg-gray-100" onclick="updateQuantity({{ item.id }}, {{ item.quantity|add:'-1' }})">
+                                <i class="fas fa-minus text-sm"></i>
+                            </button>
+                            <input type="number" value="{{ item.quantity }}" min="1" 
+                                   class="cart-quantity-input w-16 text-center border-0 focus:ring-0" 
+                                   data-item-id="{{ item.id }}">
+                            <button class="increase px-3 py-1 hover:bg-gray-100" onclick="updateQuantity({{ item.id }}, {{ item.quantity|add:'1' }})">
+                                <i class="fas fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="text-right mr-4">
+                        <p class="font-semibold text-gray-800">${{ item.total_price }}</p>
+                        <p class="text-sm text-gray-600">${{ item.unit_price }} each</p>
+                    </div>
+                    
+                    <!-- Remove Button -->
+                    <form method="post" action="{% url 'cart:remove' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="text-red-500 hover:text-red-700 p-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Cart Actions -->
+            <div class="flex justify-between items-center mt-6">
+                <a href="{% url 'products:list' %}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+                </a>
+                
+                <form method="post" action="{% url 'cart:clear' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" onclick="return confirm('Are you sure you want to clear your cart?')">
+                        <i class="fas fa-trash mr-2"></i>Clear Cart
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                <h3 class="text-lg font-semibold mb-4">Order Summary</h3>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span>Subtotal ({{ cart.total_items }} items)</span>
+                        <span class="cart-total">${{ cart.total_price }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Shipping</span>
+                        <span class="text-green-600">Free</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax</span>
+                        <span>$0.00</span>
+                    </div>
+                    <hr>
+                    <div class="flex justify-between text-lg font-semibold">
+                        <span>Total</span>
+                        <span class="cart-total">${{ cart.total_price }}</span>
+                    </div>
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'orders:checkout' %}" class="btn btn-primary w-full mb-3">
+                        <i class="fas fa-lock mr-2"></i>Proceed to Checkout
+                    </a>
+                {% else %}
+                    <div class="text-center mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Sign in to checkout</p>
+                        <a href="{% url 'account_login' %}?next={% url 'orders:checkout' %}" class="btn btn-primary w-full mb-2">
+                            Sign In
+                        </a>
+                        <a href="{% url 'account_signup' %}" class="btn btn-outline w-full">
+                            Create Account
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Security Badges -->
+                <div class="text-center text-sm text-gray-500 mt-4">
+                    <div class="flex items-center justify-center space-x-2 mb-2">
+                        <i class="fas fa-shield-alt text-green-500"></i>
+                        <span>Secure Checkout</span>
+                    </div>
+                    <div class="flex items-center justify-center space-x-2">
+                        <i class="fas fa-truck text-blue-500"></i>
+                        <span>Free Shipping on $50+</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="text-center py-16">
+        <div class="max-w-md mx-auto">
+            <i class="fas fa-shopping-cart text-gray-400 text-6xl mb-6"></i>
+            <h2 class="text-2xl font-semibold text-gray-600 mb-4">Your cart is empty</h2>
+            <p class="text-gray-500 mb-8">Looks like you haven't added any items to your cart yet.</p>
+            <a href="{% url 'products:list' %}" class="btn btn-primary px-8 py-3">
+                Start Shopping <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateQuantity(itemId, newQuantity) {
+    if (newQuantity < 1) {
+        if (confirm('Remove this item from cart?')) {
+            // Redirect to remove URL
+            window.location.href = `/cart/remove/${itemId}/`;
+        }
+        return;
+    }
+    
+    Cart.update(itemId, newQuantity).then(data => {
+        if (data.success) {
+            // Update the input value
+            document.querySelector(`input[data-item-id="${itemId}"]`).value = newQuantity;
+            
+            // Update total price for this item
+            const itemRow = document.querySelector(`input[data-item-id="${itemId}"]`).closest('.flex');
+            // You might want to update the item total here
+            
+            // Reload page to update all totals
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+    });
+}
+
+// Handle quantity input changes
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.cart-quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.dataset.itemId;
+            const quantity = parseInt(this.value);
+            updateQuantity(itemId, quantity);
+        });
+    });
+});
+</script>
+{% endblock %}

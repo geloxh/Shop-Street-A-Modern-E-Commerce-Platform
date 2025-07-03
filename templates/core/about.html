@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - Shop Street{% endblock %}
+
+{% block content %}
+<div class="bg-white">
+    <!-- Hero Section -->
+    <div class="bg-primary-600 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl font-bold mb-4">About Shop Street</h1>
+            <p class="text-xl opacity-90">Your trusted partner for quality products and exceptional service</p>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-16">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Our Story</h2>
+                    <p class="text-gray-600 mb-4">
+                        Founded with a vision to make quality products accessible to everyone, Shop Street has been serving customers with dedication and excellence since our inception.
+                    </p>
+                    <p class="text-gray-600 mb-4">
+                        We believe in providing not just products, but complete shopping experiences that exceed expectations. Our commitment to quality, customer service, and innovation drives everything we do.
+                    </p>
+                    <p class="text-gray-600">
+                        From electronics to fashion, home essentials to books, we carefully curate our product selection to ensure you get the best value for your money.
+                    </p>
+                </div>
+                <div class="bg-gray-100 rounded-lg p-8 text-center">
+                    <i class="fas fa-store text-primary-600 text-6xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Shop Street</h3>
+                    <p class="text-gray-600">Quality products, exceptional service</p>
+                </div>
+            </div>
+            
+            <!-- Values -->
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-12">Our Values</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-heart text-primary-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Customer First</h3>
+                        <p class="text-gray-600">Your satisfaction is our top priority. We go above and beyond to ensure you have the best shopping experience.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-gem text-primary-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Quality Assured</h3>
+                        <p class="text-gray-600">We carefully select every product to ensure it meets our high standards of quality and durability.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-handshake text-primary-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Trust & Integrity</h3>
+                        <p class="text-gray-600">We build lasting relationships through honest business practices and transparent communication.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="bg-gray-50 rounded-lg p-8 mb-16">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <div class="text-3xl font-bold text-primary-600 mb-2">10K+</div>
+                        <div class="text-gray-600">Happy Customers</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-primary-600 mb-2">5K+</div>
+                        <div class="text-gray-600">Products</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-primary-600 mb-2">99%</div>
+                        <div class="text-gray-600">Satisfaction Rate</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-primary-600 mb-2">24/7</div>
+                        <div class="text-gray-600">Support</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CTA -->
+            <div class="text-center">
+                <h2 class="text-2xl font-bold mb-4">Ready to Start Shopping?</h2>
+                <p class="text-gray-600 mb-8">Discover amazing products at unbeatable prices</p>
+                <a href="{% url 'products:list' %}" class="btn btn-primary px-8 py-3">
+                    Browse Products <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
